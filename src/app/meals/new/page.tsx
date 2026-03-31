@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import { MealForm } from "@/components/meals/MealForm";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   searchParams: { import?: string };
 }
