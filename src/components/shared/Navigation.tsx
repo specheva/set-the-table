@@ -18,7 +18,8 @@ export function Navigation() {
       {/* Desktop: top nav */}
       <nav className="hidden sm:block sticky top-0 z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-          <Link href="/" className="text-lg font-bold text-blue-600">
+          <Link href="/" className="flex items-center gap-2 text-lg font-bold text-blue-600">
+            <img src="/logo.svg" alt="Set the Table" className="h-7 w-7" />
             Set the Table
           </Link>
           <div className="flex items-center gap-1">

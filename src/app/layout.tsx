@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Set the Table — Your Kitchen Planning Assistant",
   description:
     "Your personal kitchen assistant for weekly meal planning, smart suggestions, and ingredient management.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export const viewport: Viewport = {
