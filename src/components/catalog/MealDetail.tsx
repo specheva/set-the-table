@@ -30,8 +30,26 @@ export function MealDetail({ meal }: MealDetailProps) {
   const router = useRouter();
   const [isFavorite, setIsFavorite] = useState(meal.isFavorite);
   const [deleting, setDeleting] = useState(false);
+  const [prepTime, setPrepTime] = useState(meal.prepTimeMinutes || 0);
+  const [cookTime, setCookTime] = useState(meal.cookTimeMinutes || 0);
+  const [editingPrep, setEditingPrep] = useState(false);
+  const [editingCook, setEditingCook] = useState(false);
 
-  const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
+  const totalTime = prepTime + cookTime;
+
+  const saveTime = async (field: "prepTimeMinutes" | "cookTimeMinutes", value: number) => {
+    await fetch(`/api/meals/${meal.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        [field]: value,
+        tagIds: meal.tags.map((mt) => mt.tag.id),
+        ingredients: meal.ingredients.map((i) => ({
+          name: i.name, quantity: i.quantity, unit: i.unit, note: i.note, category: i.category,
+        })),
+      }),
+    });
+  };
 
   const toggleFavorite = async () => {
     setIsFavorite(!isFavorite);
@@ -274,27 +292,71 @@ export function MealDetail({ meal }: MealDetailProps) {
         </button>
       </div>
 
-      {/* Time details */}
-      {(meal.prepTimeMinutes || meal.cookTimeMinutes) && (
-        <div className="grid grid-cols-2 gap-3">
-          {meal.prepTimeMinutes && (
-            <div className="rounded-xl bg-white border border-stone-200 p-3 text-center">
-              <div className="text-lg font-semibold text-stone-900">
-                {meal.prepTimeMinutes}m
-              </div>
-              <div className="text-xs text-stone-500">Prep time</div>
+      {/* Editable time details */}
+      <div className="grid grid-cols-2 gap-3">
+        <div
+          onClick={() => setEditingPrep(true)}
+          className="rounded-xl bg-white border border-stone-200 p-3 text-center cursor-pointer hover:border-blue-300 transition-colors group"
+        >
+          {editingPrep ? (
+            <input
+              type="number"
+              min="0"
+              autoFocus
+              value={prepTime || ""}
+              onChange={(e) => setPrepTime(parseInt(e.target.value) || 0)}
+              onBlur={() => {
+                setEditingPrep(false);
+                saveTime("prepTimeMinutes", prepTime);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setEditingPrep(false);
+                  saveTime("prepTimeMinutes", prepTime);
+                }
+              }}
+              className="w-full text-lg font-semibold text-stone-900 text-center bg-transparent outline-none"
+            />
+          ) : (
+            <div className="text-lg font-semibold text-stone-900">
+              {prepTime ? `${prepTime}m` : "—"}
+              <Edit className="w-3 h-3 inline ml-1 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           )}
-          {meal.cookTimeMinutes && (
-            <div className="rounded-xl bg-white border border-stone-200 p-3 text-center">
-              <div className="text-lg font-semibold text-stone-900">
-                {meal.cookTimeMinutes}m
-              </div>
-              <div className="text-xs text-stone-500">Cook time</div>
-            </div>
-          )}
+          <div className="text-xs text-stone-500">Prep time</div>
         </div>
-      )}
+        <div
+          onClick={() => setEditingCook(true)}
+          className="rounded-xl bg-white border border-stone-200 p-3 text-center cursor-pointer hover:border-blue-300 transition-colors group"
+        >
+          {editingCook ? (
+            <input
+              type="number"
+              min="0"
+              autoFocus
+              value={cookTime || ""}
+              onChange={(e) => setCookTime(parseInt(e.target.value) || 0)}
+              onBlur={() => {
+                setEditingCook(false);
+                saveTime("cookTimeMinutes", cookTime);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setEditingCook(false);
+                  saveTime("cookTimeMinutes", cookTime);
+                }
+              }}
+              className="w-full text-lg font-semibold text-stone-900 text-center bg-transparent outline-none"
+            />
+          ) : (
+            <div className="text-lg font-semibold text-stone-900">
+              {cookTime ? `${cookTime}m` : "—"}
+              <Edit className="w-3 h-3 inline ml-1 text-stone-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+          )}
+          <div className="text-xs text-stone-500">Cook time</div>
+        </div>
+      </div>
     </div>
   );
 }
