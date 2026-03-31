@@ -9,6 +9,7 @@ import {
   Sparkles,
   Check,
 } from "lucide-react";
+import { MealIllustration } from "@/components/shared/MealIllustration";
 import type {
   PlanEntry,
   Meal,
@@ -175,11 +176,12 @@ function WeekMealCard({
 
   return (
     <div className="rounded-lg bg-stone-50 p-1.5 group relative">
-      {/* Difficulty indicator */}
-      <div
-        className={`absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full ${
-          difficultyColor[meal.difficulty] || "bg-amber-400"
-        }`}
+      {/* Illustration */}
+      <MealIllustration
+        title={meal.title}
+        ingredients={meal.ingredients?.map((i) => i.name) || []}
+        size="sm"
+        className="w-full h-8 rounded-md mb-1"
       />
 
       <p className="text-[11px] font-medium text-stone-900 leading-tight pr-3 line-clamp-2">
@@ -190,15 +192,15 @@ function WeekMealCard({
         {meal.isFavorite && (
           <Star className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
         )}
+        <span
+          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+            difficultyColor[meal.difficulty] || "bg-amber-400"
+          }`}
+        />
         {totalTime > 0 && (
           <span className="text-[9px] text-stone-400 flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5" />
             {totalTime}m
-          </span>
-        )}
-        {meal.cuisine && (
-          <span className="text-[9px] text-stone-400 truncate">
-            {meal.cuisine}
           </span>
         )}
       </div>
