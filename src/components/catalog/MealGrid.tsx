@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Search, SlidersHorizontal, Plus, Link as LinkIcon } from "lucide-react";
 import { MealCard } from "./MealCard";
+import { useToast } from "@/components/shared/Toast";
 import type { Meal, MealIngredient, Tag, MealTag } from "@prisma/client";
 
 type MealWithRelations = Meal & {
@@ -20,6 +21,7 @@ type SortOption = "recent" | "favorites" | "timesCooked" | "alphabetical";
 export function MealGrid({ meals: initialMeals, tags }: MealGridProps) {
   const [meals, setMeals] = useState(initialMeals);
   const [search, setSearch] = useState("");
+  const toast = useToast();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("recent");
   const [showFilters, setShowFilters] = useState(false);
@@ -203,11 +205,14 @@ export function MealGrid({ meals: initialMeals, tags }: MealGridProps) {
                   setMeals((prev) => prev.filter((m) => m.id !== id));
                   const res = await fetch(`/api/meals/${id}`, { method: "DELETE" });
                   if (!res.ok) {
-                    // Restore on failure
                     setMeals(initialMeals);
+                    toast.error("Failed to delete meal");
+                  } else {
+                    toast.success("Meal deleted");
                   }
                 } catch {
                   setMeals(initialMeals);
+                  toast.error("Failed to delete meal");
                 }
               }}
             />

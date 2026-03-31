@@ -13,8 +13,11 @@ import { WeeklyView } from "./WeeklyView";
 import { DailyView } from "./DailyView";
 import MonthlyView from "./MonthlyView";
 import { WeeklySummary } from "./WeeklySummary";
+import { ShoppingList } from "./ShoppingList";
 import { MealPicker } from "./MealPicker";
+import { WeekPlannerSkeleton, DailyPlannerSkeleton } from "@/components/shared/Skeleton";
 import { getWeekStart } from "@/lib/utils";
+import { useToast } from "@/components/shared/Toast";
 import type {
   Meal,
   MealIngredient,
@@ -71,6 +74,7 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
     {}
   );
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const toast = useToast();
 
   // Set default view based on screen size
   useEffect(() => {
@@ -169,8 +173,9 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
         }),
       });
       await refreshPlan();
+      toast.success("Suggestion added to plan");
     } catch {
-      // silently fail
+      toast.error("Failed to add suggestion");
     }
   };
 
@@ -182,15 +187,15 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
   };
 
   const handleMealAdded = async () => {
-    // If swapping, remove old entry first
     if (swapEntryId) {
       try {
         await fetch(`/api/plans/entries/${swapEntryId}`, { method: "DELETE" });
       } catch {
-        // continue anyway
+        // continue
       }
     }
     await refreshPlan();
+    toast.success(swapEntryId ? "Meal swapped" : "Meal added to plan");
   };
 
   const handleRemoveEntry = async (entryId: string) => {
@@ -200,10 +205,11 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
     }));
     try {
       await fetch(`/api/plans/entries/${entryId}`, { method: "DELETE" });
-      // Refresh suggestions since an entry was removed
       fetchSuggestions(plan.id);
+      toast.success("Meal removed");
     } catch {
       refreshPlan();
+      toast.error("Failed to remove meal");
     }
   };
 
@@ -287,29 +293,35 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
       )}
 
       {/* Views */}
-      {viewMode === "weekly" && (
-        <WeeklyView
-          plan={plan}
-          suggestions={suggestions}
-          loadingSuggestions={loadingSuggestions}
-          onAddMeal={openAddPicker}
-          onSwapMeal={openSwapPicker}
-          onRemoveEntry={handleRemoveEntry}
-          onAcceptSuggestion={acceptSuggestion}
-        />
-      )}
+      {isNavigating ? (
+        viewMode === "weekly" ? <WeekPlannerSkeleton /> : <DailyPlannerSkeleton />
+      ) : (
+        <>
+          {viewMode === "weekly" && (
+            <WeeklyView
+              plan={plan}
+              suggestions={suggestions}
+              loadingSuggestions={loadingSuggestions}
+              onAddMeal={openAddPicker}
+              onSwapMeal={openSwapPicker}
+              onRemoveEntry={handleRemoveEntry}
+              onAcceptSuggestion={acceptSuggestion}
+            />
+          )}
 
-      {viewMode === "daily" && (
-        <DailyView
-          plan={plan}
-          weekStart={weekStart}
-          suggestions={suggestions}
-          loadingSuggestions={loadingSuggestions}
-          onAddMeal={openAddPicker}
-          onSwapMeal={openSwapPicker}
-          onRemoveEntry={handleRemoveEntry}
-          onAcceptSuggestion={acceptSuggestion}
-        />
+          {viewMode === "daily" && (
+            <DailyView
+              plan={plan}
+              weekStart={weekStart}
+              suggestions={suggestions}
+              loadingSuggestions={loadingSuggestions}
+              onAddMeal={openAddPicker}
+              onSwapMeal={openSwapPicker}
+              onRemoveEntry={handleRemoveEntry}
+              onAcceptSuggestion={acceptSuggestion}
+            />
+          )}
+        </>
       )}
 
       {viewMode === "monthly" && (
@@ -320,8 +332,15 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
         />
       )}
 
-      {/* Weekly Summary (not in monthly view) */}
-      {viewMode !== "monthly" && <WeeklySummary entries={plan.entries} />}
+      {/* Weekly Summary + Shopping List (not in monthly view) */}
+      {viewMode !== "monthly" && !isNavigating && (
+        <>
+          <WeeklySummary entries={plan.entries} />
+          {plan.entries.length > 0 && (
+            <ShoppingList weekPlanId={plan.id} />
+          )}
+        </>
+      )}
 
       {/* Meal Picker */}
       <MealPicker
