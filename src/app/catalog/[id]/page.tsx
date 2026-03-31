@@ -19,5 +19,5 @@ export default async function MealDetailPage({ params }: Props) {
     notFound();
   }
 
-  return <MealDetail meal={meal} />;
+  return <MealDetail meal={JSON.parse(JSON.stringify(meal))} />;
 }

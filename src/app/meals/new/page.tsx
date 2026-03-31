@@ -10,5 +10,5 @@ export default async function NewMealPage({ searchParams }: Props) {
     orderBy: { name: "asc" },
   });
 
-  return <MealForm tags={tags} showImport={searchParams.import === "true"} />;
+  return <MealForm tags={JSON.parse(JSON.stringify(tags))} showImport={searchParams.import === "true"} />;
 }

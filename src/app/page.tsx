@@ -3,6 +3,8 @@ import { getWeekStart } from "@/lib/utils";
 import { Planner } from "@/components/planner/Planner";
 import { startOfDay } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const weekStart = startOfDay(getWeekStart(new Date()));
 
@@ -52,5 +54,9 @@ export default async function Home() {
     orderBy: { updatedAt: "desc" },
   });
 
-  return <Planner initialPlan={plan} allMeals={allMeals} />;
+  // Serialize to plain JSON to avoid Date serialization issues
+  const serializedPlan = JSON.parse(JSON.stringify(plan));
+  const serializedMeals = JSON.parse(JSON.stringify(allMeals));
+
+  return <Planner initialPlan={serializedPlan} allMeals={serializedMeals} />;
 }

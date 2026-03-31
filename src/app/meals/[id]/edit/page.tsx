@@ -24,5 +24,5 @@ export default async function EditMealPage({ params }: Props) {
     notFound();
   }
 
-  return <MealForm meal={meal} tags={tags} />;
+  return <MealForm meal={JSON.parse(JSON.stringify(meal))} tags={JSON.parse(JSON.stringify(tags))} />;
 }
