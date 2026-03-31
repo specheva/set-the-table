@@ -199,8 +199,16 @@ export function MealGrid({ meals: initialMeals, tags }: MealGridProps) {
               key={meal.id}
               meal={meal}
               onDelete={async (id) => {
-                await fetch(`/api/meals/${id}`, { method: "DELETE" });
-                setMeals((prev) => prev.filter((m) => m.id !== id));
+                try {
+                  setMeals((prev) => prev.filter((m) => m.id !== id));
+                  const res = await fetch(`/api/meals/${id}`, { method: "DELETE" });
+                  if (!res.ok) {
+                    // Restore on failure
+                    setMeals(initialMeals);
+                  }
+                } catch {
+                  setMeals(initialMeals);
+                }
               }}
             />
           ))}

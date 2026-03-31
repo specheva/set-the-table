@@ -65,8 +65,12 @@ export function MealDetail({ meal }: MealDetailProps) {
   const handleDelete = async () => {
     if (!confirm("Delete this meal? This cannot be undone.")) return;
     setDeleting(true);
-    await fetch(`/api/meals/${meal.id}`, { method: "DELETE" });
-    router.push("/catalog");
+    try {
+      await fetch(`/api/meals/${meal.id}`, { method: "DELETE" });
+      router.push("/catalog");
+    } catch {
+      setDeleting(false);
+    }
   };
 
   // Group ingredients by category

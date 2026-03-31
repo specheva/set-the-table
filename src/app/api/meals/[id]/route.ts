@@ -55,6 +55,16 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await prisma.meal.delete({ where: { id: params.id } });
-  return NextResponse.json({ success: true });
+  try {
+    // Remove plan entries referencing this meal first (belt + suspenders with cascade)
+    await prisma.planEntry.deleteMany({ where: { mealId: params.id } });
+    await prisma.meal.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Delete meal error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete meal" },
+      { status: 500 }
+    );
+  }
 }
