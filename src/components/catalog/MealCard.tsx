@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Star, Clock, ExternalLink, AlertCircle } from "lucide-react";
+import { Star, Clock, ExternalLink, AlertCircle, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { MealIllustration } from "@/components/shared/MealIllustration";
 import type { Meal, MealIngredient, Tag, MealTag } from "@prisma/client";
@@ -13,6 +13,7 @@ type MealWithRelations = Meal & {
 
 interface MealCardProps {
   meal: MealWithRelations;
+  onDelete?: (id: string) => void;
 }
 
 const difficultyColors: Record<string, string> = {
@@ -21,14 +22,22 @@ const difficultyColors: Record<string, string> = {
   hard: "text-red-600 bg-red-50",
 };
 
-export function MealCard({ meal }: MealCardProps) {
+export function MealCard({ meal, onDelete }: MealCardProps) {
   const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
   const tag = meal.tags[0]?.tag;
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm(`Delete "${meal.title}"?`)) {
+      onDelete?.(meal.id);
+    }
+  };
 
   return (
     <Link
       href={`/catalog/${meal.id}`}
-      className="block rounded-xl border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden tap-highlight-none"
+      className="block rounded-xl border border-stone-200 bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden tap-highlight-none group"
     >
       {/* Illustration */}
       <div className="h-32 relative overflow-hidden">
@@ -52,13 +61,23 @@ export function MealCard({ meal }: MealCardProps) {
           </div>
         )}
 
-        {meal.sourceUrl && (
-          <div className="absolute bottom-2 right-2 p-1 rounded-full bg-white/90 shadow-sm">
+        {meal.sourceUrl && !meal.isFavorite && (
+          <div className="absolute top-2 right-2 p-1 rounded-full bg-white/90 shadow-sm">
             <ExternalLink className="w-3 h-3 text-stone-500" />
           </div>
         )}
 
-        {/* Tag badge on image */}
+        {/* Delete button */}
+        {onDelete && (
+          <button
+            onClick={handleDelete}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50 tap-highlight-none z-10"
+            title="Delete meal"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+          </button>
+        )}
+
         {tag && (
           <div
             className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
@@ -75,7 +94,6 @@ export function MealCard({ meal }: MealCardProps) {
           {meal.title}
         </h3>
 
-        {/* Meta row */}
         <div className="flex items-center gap-2 mt-1">
           {totalTime > 0 && (
             <span className="text-xs text-stone-400 flex items-center gap-0.5">
@@ -95,14 +113,12 @@ export function MealCard({ meal }: MealCardProps) {
           )}
         </div>
 
-        {/* Ingredients list */}
         {meal.ingredients.length > 0 && (
           <p className="text-xs text-stone-500 mt-2 line-clamp-2">
             {meal.ingredients.map((i) => i.name).join(", ")}
           </p>
         )}
 
-        {/* Footer */}
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone-100">
           <span className="text-xs text-stone-400">
             {meal.timesCooked > 0

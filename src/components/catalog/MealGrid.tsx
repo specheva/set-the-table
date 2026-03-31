@@ -17,7 +17,8 @@ interface MealGridProps {
 
 type SortOption = "recent" | "favorites" | "timesCooked" | "alphabetical";
 
-export function MealGrid({ meals, tags }: MealGridProps) {
+export function MealGrid({ meals: initialMeals, tags }: MealGridProps) {
+  const [meals, setMeals] = useState(initialMeals);
   const [search, setSearch] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>("recent");
@@ -194,7 +195,14 @@ export function MealGrid({ meals, tags }: MealGridProps) {
       {filteredMeals.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filteredMeals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
+            <MealCard
+              key={meal.id}
+              meal={meal}
+              onDelete={async (id) => {
+                await fetch(`/api/meals/${id}`, { method: "DELETE" });
+                setMeals((prev) => prev.filter((m) => m.id !== id));
+              }}
+            />
           ))}
         </div>
       ) : (
