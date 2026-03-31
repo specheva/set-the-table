@@ -15,6 +15,7 @@ import MonthlyView from "./MonthlyView";
 import { WeeklySummary } from "./WeeklySummary";
 import { MealPicker } from "./MealPicker";
 import { getWeekStart } from "@/lib/utils";
+import { Logo } from "@/components/shared/Logo";
 import type {
   Meal,
   MealIngredient,
@@ -214,7 +215,7 @@ export function Planner({ initialPlan, allMeals }: PlannerProps) {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="flex items-center gap-2 text-xl font-bold text-stone-900"><img src="/logo.svg" alt="" className="h-7 w-7 sm:hidden" />Set the Table</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold text-stone-900"><Logo className="h-7 w-7 sm:hidden" />Set the Table</h1>
 
         {/* View mode switcher */}
         <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-0.5">

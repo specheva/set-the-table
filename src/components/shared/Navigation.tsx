@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calendar, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "./Logo";
 
 const navItems = [
   { href: "/", label: "Plan", icon: Calendar },
@@ -19,7 +20,7 @@ export function Navigation() {
       <nav className="hidden sm:block sticky top-0 z-40 border-b border-stone-200 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 text-lg font-bold text-blue-600">
-            <img src="/logo.svg" alt="Set the Table" className="h-7 w-7" />
+            <Logo className="h-7 w-7" />
             Set the Table
           </Link>
           <div className="flex items-center gap-1">
